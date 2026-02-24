@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jubiler Pro</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a1a1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3590/3590463.png">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        :root { --gold: #d4af37; --dark: #1a1a1a; --bg: #f2f2f7; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0; }
+        .app-shell { max-width: 500px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+        header { background: var(--dark); color: white; padding: 20px; text-align: center; border-bottom: 4px solid var(--gold); position: sticky; top: 0; z-index: 100; }
+        .content { padding: 15px; flex: 1; }
+        .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .mode-tab { display: flex; background: #e5e5ea; border-radius: 10px; padding: 3px; margin-bottom: 15px; }
+        .tab { flex: 1; text-align: center; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .tab.active { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        label { display: block; font-size: 0.7rem; color: #8e8e93; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+        input, select, textarea { width: 100%; border: 1px solid #d1d1d6; border-radius: 8px; padding: 10px; font-size: 1rem; box-sizing: border-box; }
+        .sticky-summary { background: var(--dark); color: white; padding: 15px 20px; display: flex; justify-content: space-between; position: sticky; bottom: 0; border-radius: 15px 15px 0 0; }
+        .total-price { color: var(--gold); font-size: 1.3rem; font-weight: 800; }
+        .btn-pdf { background: #34c759; color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+    <header><h1>JUBILER KALKULATOR</h1></header>
+    <div class="content" id="pdf-content">
+        <div id="pdf-header" style="display:none; text-align:center; padding: 20px; background: #1a1a1a; color: white; border-bottom: 4px solid #d4af37; margin-bottom: 20px;">
+            <h2 style="margin:0">SPECYFIKACJA OBRĄCZEK</h2>
+        </div>
+
+        <div class="mode-tab no-pdf">
+            <div id="tab-single" class="tab" onclick="setMode('single')">Jedna</div>
+            <div id="tab-pair" class="tab active" onclick="setMode('pair')">Para</div>
+        </div>
+
+        <div class="card">
+            <div class="row">
+                <div><label>Kruszec</label>
+                    <select id="kruszec" onchange="oblicz()">
+                        <option value="13.6">Złoto 585 (14K)</option>
+                        <option value="15.5">Złoto 750 (18K)</option>
+                        <option value="10.5">Srebro 925</option>
+                    </select>
+                </div>
+                <div><label>Cena/1g</label><input type="number" id="cenaGram" value="180" oninput="oblicz()"></div>
+            </div>
+        </div>
+
+        <div class="card" id="card-a">
+            <label>Obrączka A</label>
+            <div class="row">
+                <input type="number" id="r1_roz" placeholder="Rozmiar" value="12" oninput="oblicz()">
+                <input type="number" id="r1_szer" placeholder="Szerokość" value="4" oninput="oblicz()">
+            </div>
+            <div id="r1_wynik" style="font-size:0.8rem; color:var(--gold)">Masa: 0.00 g</div>
+        </div>
+
+        <div class="card" id="card-b">
+            <label>Obrączka B</label>
+            <div class="row">
+                <input type="number" id="r2_roz" placeholder="Rozmiar" value="22" oninput="oblicz()">
+                <input type="number" id="r2_szer" placeholder="Szerokość" value="5" oninput="oblicz()">
+            </div>
+            <div id="r2_wynik" style="font-size:0.8rem; color:var(--gold)">Masa: 0.00 g</div>
+        </div>
+
+        <div class="card"><label>Notatki</label><textarea id="notatki" placeholder="Grawer..."></textarea></div>
+        <button class="btn-pdf no-pdf" onclick="generatePDF()">💾 GENERUJ PDF</button>
+    </div>
+
+    <div class="sticky-summary">
+        <div id="totalMasa">0.00 g</div>
+        <div id="totalKoszt" class="total-price">0.00 zł</div>
+    </div>
+</div>
+
+<script>
+    // Rejestracja Service Workera
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+    }
+
+    let currentMode = 'pair';
+    function setMode(m) {
+        currentMode = m;
+        document.getElementById('card-b').style.display = m === 'single' ? 'none' : 'block';
+        document.getElementById('tab-single').classList.toggle('active', m === 'single');
+        document.getElementById('tab-pair').classList.toggle('active', m === 'pair');
+        oblicz();
+    }
+
+    function oblicz() {
+        const gestosc = parseFloat(document.getElementById('kruszec').value);
+        const cena = parseFloat(document.getElementById('cenaGram').value) || 0;
+        
+        const licz = (idR, idS) => {
+            const r = parseFloat(document.getElementById(idR).value);
+            const s = parseFloat(document.getElementById(idS).value);
+            const m = (Math.PI * ((12.33 + r*0.333)/2 + 1.3)**2 - Math.PI * ((12.33 + r*0.333)/2)**2) * s * (gestosc/1000);
+            return m;
+        };
+
+        const m1 = licz('r1_roz', 'r1_szer');
+        const m2 = currentMode === 'pair' ? licz('r2_roz', 'r2_szer') : 0;
+        const totalMasa = m1 + m2;
+
+        document.getElementById('r1_wynik').innerText = `Masa: ${m1.toFixed(2)} g`;
+        if(currentMode === 'pair') document.getElementById('r2_wynik').innerText = `Masa: ${m2.toFixed(2)} g`;
+        document.getElementById('totalMasa').innerText = totalMasa.toFixed(2) + " g";
+        document.getElementById('totalKoszt').innerText = (totalMasa * cena).toLocaleString('pl-PL', {minimumFractionDigits:2}) + " zł";
+    }
+
+    function generatePDF() {
+        const el = document.getElementById('pdf-content');
+        document.getElementById('pdf-header').style.display = 'block';
+        document.querySelectorAll('.no-pdf').forEach(n => n.style.display = 'none');
+        
+        html2pdf().set({
+            margin: [10, 10],
+            filename: 'Wycena.pdf',
+            html2canvas: { scale: 2, windowWidth: 800 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        }).from(el).save().then(() => location.reload());
+    }
+    oblicz();
+</script>
+</body>
+</html>
