@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jubiler Pro v5</title>
+    <title>Jubiler DS - Kalkulator</title>
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -11,31 +11,51 @@
         :root { --gold: #d4af37; --dark: #1a1a1a; --bg: #f2f2f7; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0; }
         .app-shell { max-width: 600px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; background: white; }
-        header { background: var(--dark); color: white; padding: 20px; text-align: center; border-bottom: 4px solid var(--gold); }
+        
+        /* Nagłówek z Logo */
+        header { background: var(--dark); color: white; padding: 15px; text-align: center; border-bottom: 4px solid var(--gold); display: flex; align-items: center; justify-content: center; gap: 15px; }
+        header img { height: 40px; width: auto; }
+        header h1 { margin: 0; font-size: 1.1rem; letter-spacing: 1px; }
+
         .content { padding: 15px; flex: 1; }
         .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .mode-tab { display: flex; background: #e5e5ea; border-radius: 10px; padding: 3px; margin-bottom: 15px; }
         .tab { flex: 1; text-align: center; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .tab.active { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         label { display: block; font-size: 0.7rem; color: #666; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
         input, select, textarea { width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 12px; font-size: 1rem; box-sizing: border-box; background: #fff; -webkit-appearance: none; }
+        
         .mass-label { display: block; margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 8px; text-align: center; font-weight: 800; color: var(--dark); border: 1px dashed #ccc; }
+        
         .sticky-summary { background: var(--dark); color: white; padding: 20px; display: flex; justify-content: space-between; position: sticky; bottom: 0; border-radius: 20px 20px 0 0; z-index: 100; }
         .btn-pdf { background: #27ae60; color: white; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: bold; font-size: 1.1rem; margin-top: 10px; cursor: pointer; }
-        #pdf-header { display: none; text-align: center; background: #1a1a1a; color: white; padding: 30px; border-bottom: 5px solid #d4af37; }
+
+        /* Nagłówek PDF */
+        #pdf-header { display: none; background: #1a1a1a; color: white; padding: 25px; border-bottom: 5px solid #d4af37; }
+        .pdf-flex { display: flex; align-items: center; justify-content: space-between; }
+        .pdf-logo { height: 60px; width: auto; }
         .no-pdf { display: block; }
     </style>
 </head>
 <body>
 
 <div class="app-shell">
-    <header class="no-pdf"><h1>JUBILER PRO</h1></header>
+    <header class="no-pdf">
+        <img src="logo-jubilerds.png" alt="Logo">
+        <h1>JUBILER DS</h1>
+    </header>
 
     <div class="content" id="main-app">
         <div id="pdf-header">
-            <h1 style="margin:0; font-size: 24px;">SPECYFIKACJA OBRĄCZEK</h1>
-            <p id="pdf-date" style="margin:10px 0 0 0; opacity:0.8; font-size: 14px;"></p>
+            <div class="pdf-flex">
+                <img src="logo-jubilerds.png" class="pdf-logo">
+                <div style="text-align: right;">
+                    <h2 style="margin:0; font-size: 20px; color: #d4af37;">SPECYFIKACJA PROJEKTOWA</h2>
+                    <p id="pdf-date" style="margin:5px 0 0 0; opacity:0.8; font-size: 12px;"></p>
+                </div>
+            </div>
         </div>
 
         <div class="mode-tab no-pdf">
@@ -51,7 +71,6 @@
                         <option value="13.6" selected>Złoto 585 (14K)</option>
                         <option value="15.5">Złoto 750 (18K)</option>
                         <option value="10.5">Srebro 925</option>
-                        <option value="21.4">Platyna 950</option>
                     </select>
                 </div>
                 <div><label>Cena/1g</label><input type="number" id="cenaGram" value="180" oninput="oblicz()"></div>
@@ -98,9 +117,9 @@
             <div id="r2_w" class="mass-label">Masa: 0.00 g</div>
         </div>
 
-        <div class="card"><label>Notatki</label><textarea id="notatki" placeholder="Grawer, termin..."></textarea></div>
+        <div class="card"><label>Notatki i Grawer</label><textarea id="notatki" placeholder="Wpisz treść grawerunku lub uwagi..."></textarea></div>
         
-        <button class="btn-pdf no-pdf" onclick="generatePDF()">💾 GENERUJ PDF</button>
+        <button class="btn-pdf no-pdf" onclick="generatePDF()">💾 GENERUJ SPECYFIKACJĘ PDF</button>
     </div>
 
     <div class="sticky-summary no-pdf">
@@ -151,7 +170,7 @@
 
         const opt = {
             margin: [0, 0],
-            filename: 'Wycena_Obraczek.pdf',
+            filename: 'Wycena_JubilerDS.pdf',
             image: { type: 'jpeg', quality: 1 },
             html2canvas: { scale: 2, useCORS: true, windowWidth: 800 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -160,7 +179,7 @@
         html2pdf().set(opt).from(area).save().then(() => {
             pdfHead.style.display = 'none';
             document.querySelectorAll('.no-pdf').forEach(el => el.style.display = 'flex');
-            document.querySelector('header.no-pdf').style.display = 'block';
+            document.querySelector('header.no-pdf').style.display = 'flex';
             setMode(mode);
         });
     }
