@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jubiler Pro v3</title>
+    <title>Jubiler Pro v4</title>
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -19,12 +19,10 @@
         .tab.active { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         label { display: block; font-size: 0.7rem; color: #666; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
-        input, select, textarea { width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 12px; font-size: 1rem; box-sizing: border-box; background: #fff; }
+        input, select, textarea { width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 12px; font-size: 1rem; box-sizing: border-box; background: #fff; -webkit-appearance: none; }
         .mass-label { display: block; margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 8px; text-align: center; font-weight: 800; color: var(--dark); border: 1px dashed #ccc; }
-        .sticky-summary { background: var(--dark); color: white; padding: 20px; display: flex; justify-content: space-between; position: sticky; bottom: 0; border-radius: 20px 20px 0 0; }
-        .btn-pdf { background: #27ae60; color: white; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: bold; font-size: 1.1rem; margin-top: 10px; }
-        
-        /* Poprawka PDF */
+        .sticky-summary { background: var(--dark); color: white; padding: 20px; display: flex; justify-content: space-between; position: sticky; bottom: 0; border-radius: 20px 20px 0 0; z-index: 100; }
+        .btn-pdf { background: #27ae60; color: white; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: bold; font-size: 1.1rem; margin-top: 10px; cursor: pointer; }
         #pdf-header { display: none; text-align: center; background: #1a1a1a; color: white; padding: 30px; border-bottom: 5px solid #d4af37; }
         .no-pdf { display: block; }
     </style>
@@ -36,8 +34,8 @@
 
     <div class="content" id="main-app">
         <div id="pdf-header">
-            <h1 style="margin:0">SPECYFIKACJA OBRĄCZEK</h1>
-            <p id="pdf-date" style="margin:10px 0 0 0; opacity:0.8"></p>
+            <h1 style="margin:0; font-size: 24px;">SPECYFIKACJA OBRĄCZEK</h1>
+            <p id="pdf-date" style="margin:10px 0 0 0; opacity:0.8; font-size: 14px;"></p>
         </div>
 
         <div class="mode-tab no-pdf">
@@ -75,7 +73,7 @@
                     </select>
                 </div>
             </div>
-            <div id="r1_w" class="mass-label">Masa: 3.92 g</div>
+            <div id="r1_w" class="mass-label">Masa: 0.00 g</div>
         </div>
 
         <div class="card" id="card-b">
@@ -95,7 +93,7 @@
                     </select>
                 </div>
             </div>
-            <div id="r2_w" class="mass-label">Masa: 5.82 g</div>
+            <div id="r2_w" class="mass-label">Masa: 0.00 g</div>
         </div>
 
         <div class="card"><label>Notatki</label><textarea id="notatki" placeholder="Grawer, termin..."></textarea></div>
@@ -104,8 +102,8 @@
     </div>
 
     <div class="sticky-summary no-pdf">
-        <div id="totalMasa" style="font-weight:bold">9.74 g</div>
-        <div id="totalKoszt" style="color:var(--gold); font-weight:800; font-size:1.4rem">1753.20 zł</div>
+        <div id="totalMasa" style="font-weight:bold">0.00 g</div>
+        <div id="totalKoszt" style="color:var(--gold); font-weight:800; font-size:1.4rem">0.00 zł</div>
     </div>
 </div>
 
@@ -120,44 +118,54 @@
     }
 
     function oblicz() {
-        const g = parseFloat(document.getElementById('kruszec').value);
-        const c = parseFloat(document.getElementById('cenaGram').value) || 0;
+        // Bezpieczne pobieranie wartości (NaN protection)
+        const getV = (id) => parseFloat(document.getElementById(id).value) || 0;
+        const g = getV('kruszec');
+        const c = getV('cenaGram');
         
         const f = (r, s, gr, m) => {
+            if(r <= 0 || s <= 0 || gr <= 0) return 0;
             const sr = 12.33 + (r * 0.333);
             return (Math.PI * (Math.pow(sr/2+gr, 2) - Math.pow(sr/2, 2)) * s * g / 1000) * m;
         };
 
-        const m1 = f(document.getElementById('r1_roz').value, document.getElementById('r1_szer').value, document.getElementById('r1_grub').value, document.getElementById('r1_mod').value);
-        const m2 = mode === 'pair' ? f(document.getElementById('r2_roz').value, document.getElementById('r2_szer').value, document.getElementById('r2_grub').value, document.getElementById('r2_mod').value) : 0;
+        const m1 = f(getV('r1_roz'), getV('r1_szer'), getV('r1_grub'), getV('r1_mod'));
+        const m2 = mode === 'pair' ? f(getV('r2_roz'), getV('r2_szer'), getV('r2_grub'), getV('r2_mod')) : 0;
         
         document.getElementById('r1_w').innerText = `Masa: ${m1.toFixed(2)} g`;
         if(mode === 'pair') document.getElementById('r2_w').innerText = `Masa: ${m2.toFixed(2)} g`;
         
         const tm = m1 + m2;
         document.getElementById('totalMasa').innerText = tm.toFixed(2) + " g";
-        document.getElementById('totalKoszt').innerText = (tm * c).toLocaleString('pl-PL') + " zł";
+        document.getElementById('totalKoszt').innerText = (tm * c).toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " zł";
     }
 
     function generatePDF() {
         const area = document.getElementById('main-app');
-        document.getElementById('pdf-header').style.display = 'block';
-        document.getElementById('pdf-date').innerText = "Data: " + new Date().toLocaleDateString();
+        const pdfHead = document.getElementById('pdf-header');
+        
+        pdfHead.style.display = 'block';
+        document.getElementById('pdf-date').innerText = "Data wyceny: " + new Date().toLocaleDateString();
         document.querySelectorAll('.no-pdf').forEach(el => el.style.display = 'none');
 
-        html2pdf().set({
-            margin: [10, 10],
-            filename: 'Wycena.pdf',
+        const opt = {
+            margin: [0, 0],
+            filename: 'Wycena_Obraczek.pdf',
             image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 2, windowWidth: 800 },
+            html2canvas: { scale: 2, useCORS: true, windowWidth: 800 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        }).from(area).save().then(() => {
-            document.getElementById('pdf-header').style.display = 'none';
-            document.querySelectorAll('.no-pdf').forEach(el => el.style.display = 'block');
+        };
+
+        html2pdf().set(opt).from(area).save().then(() => {
+            pdfHead.style.display = 'none';
+            document.querySelectorAll('.no-pdf').forEach(el => el.style.display = 'flex');
+            // Przywrócenie display block dla nagłówka
+            document.querySelector('header.no-pdf').style.display = 'block';
             setMode(mode);
         });
     }
-    oblicz();
+    // Inicjalizacja
+    setTimeout(oblicz, 100);
 </script>
 </body>
 </html>
