@@ -17,7 +17,6 @@
         :root { --gold: #d4af37; --dark: #1a1a1a; --bg: #f2f2f7; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0; color: #333; }
         
-        /* Layout aplikacji */
         .app-shell { max-width: 600px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; background: white; }
         
         header { background: var(--dark); color: white; padding: 20px; text-align: center; border-bottom: 4px solid var(--gold); }
@@ -25,7 +24,6 @@
 
         .content { padding: 15px; flex: 1; }
 
-        /* Karty i interfejs */
         .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; }
         .mode-tab { display: flex; background: #e5e5ea; border-radius: 10px; padding: 3px; margin-bottom: 15px; }
         .tab { flex: 1; text-align: center; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
@@ -33,36 +31,38 @@
 
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         label { display: block; font-size: 0.65rem; color: #8e8e93; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
-        input, select, textarea { width: 100%; border: 1px solid #d1d1d6; border-radius: 8px; padding: 12px; font-size: 1rem; box-sizing: border-box; background: #fafafa; }
+        input, select, textarea { width: 100%; border: 1px solid #d1d1d6; border-radius: 8px; padding: 12px; font-size: 1rem; box-sizing: border-box; background: #fafafa; font-family: inherit; }
         
-        .mass-badge { display: inline-block; margin-top: 8px; padding: 4px 10px; background: #f8f9fa; border-radius: 6px; font-weight: bold; font-size: 0.9rem; color: var(--dark); }
+        .mass-badge { display: inline-block; margin-top: 8px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; font-weight: 800; font-size: 0.95rem; color: var(--dark); border: 1px solid #ddd; width: 100%; box-sizing: border-box; text-align: center;}
 
-        /* Podsumowanie dolne */
-        .sticky-summary { background: var(--dark); color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; position: sticky; bottom: 0; z-index: 10; border-radius: 15px 15px 0 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); }
+        .sticky-summary { background: var(--dark); color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; position: sticky; bottom: 0; z-index: 10; border-radius: 15px 15px 0 0; }
         .total-price { color: var(--gold); font-size: 1.4rem; font-weight: 800; }
         .total-label { font-size: 0.6rem; opacity: 0.7; display: block; letter-spacing: 1px; }
 
         .btn-pdf { background: #27ae60; color: white; border: none; width: 100%; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px; }
 
-        /* Ukrywanie elementów w PDF */
         .no-pdf { display: block; }
+        #pdf-header-only { display: none; text-align: center; padding: 25px; background: #1a1a1a; color: white; border-bottom: 5px solid #d4af37; margin-bottom: 20px; }
         
-        /* Specjalny styl dla PDF */
-        #pdf-header-only { display: none; text-align: center; padding: 20px; background: #1a1a1a; color: white; border-bottom: 4px solid #d4af37; margin-bottom: 20px; }
+        /* Styl dla PDF, aby karty były obok siebie na A4 */
+        @media print {
+            .row { gap: 20px; }
+            .card { border: 1px solid #ccc; break-inside: avoid; }
+        }
     </style>
 </head>
 <body>
 
 <div class="app-shell">
     <header class="no-pdf">
-        <h1>Kalkulator Obrączek</h1>
-        <small id="display-date" style="opacity: 0.5;"></small>
+        <h1>KALKULATOR OBRĄCZEK</h1>
+        <small id="display-date" style="opacity: 0.5; font-size: 0.7rem;"></small>
     </header>
 
     <div class="content" id="pdf-area">
         <div id="pdf-header-only">
-            <h2 style="margin:0; letter-spacing: 2px;">SPECYFIKACJA PROJEKTOWA</h2>
-            <p id="pdf-date-val" style="font-size: 0.8rem; margin: 5px 0 0 0; opacity: 0.8;"></p>
+            <h1 style="margin:0; font-size: 22px; text-transform: uppercase;">Specyfikacja Projektowa Obrączek</h1>
+            <p id="pdf-date-val" style="font-size: 12px; margin: 10px 0 0 0; opacity: 0.8;"></p>
         </div>
 
         <div class="mode-tab no-pdf">
@@ -89,7 +89,7 @@
         </div>
 
         <div class="card" id="card-a">
-            <h3 style="margin: 0 0 15px 0; font-size: 1rem;">💍 Obrączka A (Damska)</h3>
+            <h3 style="margin: 0 0 15px 0; font-size: 0.9rem; color: var(--gold);">💍 OBRĄCZKA A (DAMSKA)</h3>
             <div class="row">
                 <div><label>Rozmiar PL</label><input type="number" id="r1_roz" value="12" oninput="oblicz()"></div>
                 <div><label>Szerokość (mm)</label><input type="number" id="r1_szer" value="4" step="0.5" oninput="oblicz()"></div>
@@ -100,9 +100,9 @@
                     <label>Profil / Soczewka</label>
                     <select id="r1_mod" onchange="oblicz()">
                         <option value="1.0">Płaska / Brak</option>
-                        <option value="1.12">Płaska + Socz.</option>
-                        <option value="0.8">Półokr. / Brak</option>
-                        <option value="0.95">Półokr. + Socz.</option>
+                        <option value="1.12">Płaska + Soczewka</option>
+                        <option value="0.8">Półokrągła / Brak</option>
+                        <option value="0.95">Półokrągła + Soczewka</option>
                     </select>
                 </div>
             </div>
@@ -110,7 +110,7 @@
         </div>
 
         <div class="card" id="card-b">
-            <h3 style="margin: 0 0 15px 0; font-size: 1rem;">💍 Obrączka B (Męska)</h3>
+            <h3 style="margin: 0 0 15px 0; font-size: 0.9rem; color: var(--gold);">💍 OBRĄCZKA B (MĘSKA)</h3>
             <div class="row">
                 <div><label>Rozmiar PL</label><input type="number" id="r2_roz" value="22" oninput="oblicz()"></div>
                 <div><label>Szerokość (mm)</label><input type="number" id="r2_szer" value="5" step="0.5" oninput="oblicz()"></div>
@@ -121,9 +121,9 @@
                     <label>Profil / Soczewka</label>
                     <select id="r2_mod" onchange="oblicz()">
                         <option value="1.0">Płaska / Brak</option>
-                        <option value="1.12">Płaska + Socz.</option>
-                        <option value="0.8">Półokr. / Brak</option>
-                        <option value="0.95">Półokr. + Socz.</option>
+                        <option value="1.12">Płaska + Soczewka</option>
+                        <option value="0.8">Półokrągła / Brak</option>
+                        <option value="0.95">Półokrągła + Soczewka</option>
                     </select>
                 </div>
             </div>
@@ -131,11 +131,11 @@
         </div>
 
         <div class="card">
-            <label>Dodatkowe notatki</label>
-            <textarea id="notatki" placeholder="Wpisz grawer, termin, rodzaj matowania..."></textarea>
+            <label>Dodatkowe notatki i uwagi</label>
+            <textarea id="notatki" rows="3" placeholder="Grawer, termin, wykończenie powierzchni..."></textarea>
         </div>
 
-        <button class="btn-pdf no-pdf" onclick="generatePDF()">💾 Generuj PDF do wydruku</button>
+        <button class="btn-pdf no-pdf" onclick="generatePDF()">💾 GENERUJ PDF DO WYDRUKU</button>
     </div>
 
     <div class="sticky-summary no-pdf">
@@ -151,14 +151,11 @@
 </div>
 
 <script>
-    // Rejestracja PWA
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js');
-    }
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
 
     let currentMode = 'pair';
     const dzisiaj = new Date().toLocaleDateString('pl-PL');
-    document.getElementById('display-date').innerText = dzisiaj;
+    document.getElementById('display-date').innerText = "Wersja Mobile Pro | " + dzisiaj;
     document.getElementById('pdf-date-val').innerText = "Data wyceny: " + dzisiaj;
 
     function setMode(mode) {
@@ -173,7 +170,9 @@
     function liczMase(roz, szer, grub, mod) {
         const gestosc = parseFloat(document.getElementById('kruszec').value);
         const srednica = 12.33 + (roz * 0.333);
-        const vol = Math.PI * (Math.pow((srednica/2 + grub), 2) - Math.pow((srednica/2), 2)) * szer;
+        const rWew = srednica / 2;
+        const rZew = rWew + grub;
+        const vol = Math.PI * (Math.pow(rZew, 2) - Math.pow(rWew, 2)) * szer;
         return (vol / 1000) * gestosc * mod;
     }
 
@@ -209,30 +208,25 @@
         const pdfHeader = document.getElementById('pdf-header-only');
         const noPdf = document.querySelectorAll('.no-pdf');
 
-        // Przygotowanie widoku do "zdjęcia"
         pdfHeader.style.display = 'block';
         noPdf.forEach(el => el.style.display = 'none');
         
-        // Sztywne wymiary dla html2pdf, aby uniknąć ucinania boków
         const originalWidth = element.style.width;
         element.style.width = "750px"; 
 
         const opt = {
-            margin: [15, 10, 15, 10],
-            filename: 'Wycena_Obraczek.pdf',
+            margin: [10, 10, 10, 10],
+            filename: 'Wycena_Obraczek_' + new Date().toISOString().slice(0,10) + '.pdf',
             image: { type: 'jpeg', quality: 1.0 },
             html2canvas: { scale: 2, useCORS: true, windowWidth: 800 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
         html2pdf().set(opt).from(element).save().then(() => {
-            // Przywrócenie interfejsu aplikacji
             element.style.width = originalWidth;
             pdfHeader.style.display = 'none';
             noPdf.forEach(el => el.style.display = 'flex');
-            // Naprawa display dla elementów które nie są flex
             document.querySelector('header').style.display = 'block';
-            document.querySelector('.mode-tab').style.display = 'flex';
             setMode(currentMode); 
         });
     }
