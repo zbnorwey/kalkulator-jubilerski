@@ -3,234 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jubiler Pro - Kalkulator</title>
-    
+    <title>Jubiler Pro v3</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1a1a1a">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3590/3590463.png">
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
     <style>
         :root { --gold: #d4af37; --dark: #1a1a1a; --bg: #f2f2f7; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0; color: #333; }
-        
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0; }
         .app-shell { max-width: 600px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; background: white; }
-        
         header { background: var(--dark); color: white; padding: 20px; text-align: center; border-bottom: 4px solid var(--gold); }
-        header h1 { margin: 0; font-size: 1.2rem; letter-spacing: 1px; text-transform: uppercase; }
-
         .content { padding: 15px; flex: 1; }
-
-        .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; }
+        .card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .mode-tab { display: flex; background: #e5e5ea; border-radius: 10px; padding: 3px; margin-bottom: 15px; }
-        .tab { flex: 1; text-align: center; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+        .tab { flex: 1; text-align: center; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .tab.active { background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-        label { display: block; font-size: 0.65rem; color: #8e8e93; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
-        input, select, textarea { width: 100%; border: 1px solid #d1d1d6; border-radius: 8px; padding: 12px; font-size: 1rem; box-sizing: border-box; background: #fafafa; font-family: inherit; }
+        label { display: block; font-size: 0.7rem; color: #666; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
+        input, select, textarea { width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 12px; font-size: 1rem; box-sizing: border-box; background: #fff; }
+        .mass-label { display: block; margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 8px; text-align: center; font-weight: 800; color: var(--dark); border: 1px dashed #ccc; }
+        .sticky-summary { background: var(--dark); color: white; padding: 20px; display: flex; justify-content: space-between; position: sticky; bottom: 0; border-radius: 20px 20px 0 0; }
+        .btn-pdf { background: #27ae60; color: white; border: none; width: 100%; padding: 18px; border-radius: 12px; font-weight: bold; font-size: 1.1rem; margin-top: 10px; }
         
-        .mass-badge { display: inline-block; margin-top: 8px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; font-weight: 800; font-size: 0.95rem; color: var(--dark); border: 1px solid #ddd; width: 100%; box-sizing: border-box; text-align: center;}
-
-        .sticky-summary { background: var(--dark); color: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; position: sticky; bottom: 0; z-index: 10; border-radius: 15px 15px 0 0; }
-        .total-price { color: var(--gold); font-size: 1.4rem; font-weight: 800; }
-        .total-label { font-size: 0.6rem; opacity: 0.7; display: block; letter-spacing: 1px; }
-
-        .btn-pdf { background: #27ae60; color: white; border: none; width: 100%; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px; }
-
+        /* Poprawka PDF */
+        #pdf-header { display: none; text-align: center; background: #1a1a1a; color: white; padding: 30px; border-bottom: 5px solid #d4af37; }
         .no-pdf { display: block; }
-        #pdf-header-only { display: none; text-align: center; padding: 25px; background: #1a1a1a; color: white; border-bottom: 5px solid #d4af37; margin-bottom: 20px; }
-        
-        /* Styl dla PDF, aby karty były obok siebie na A4 */
-        @media print {
-            .row { gap: 20px; }
-            .card { border: 1px solid #ccc; break-inside: avoid; }
-        }
     </style>
 </head>
 <body>
 
 <div class="app-shell">
-    <header class="no-pdf">
-        <h1>KALKULATOR OBRĄCZEK</h1>
-        <small id="display-date" style="opacity: 0.5; font-size: 0.7rem;"></small>
-    </header>
+    <header class="no-pdf"><h1>JUBILER PRO</h1></header>
 
-    <div class="content" id="pdf-area">
-        <div id="pdf-header-only">
-            <h1 style="margin:0; font-size: 22px; text-transform: uppercase;">Specyfikacja Projektowa Obrączek</h1>
-            <p id="pdf-date-val" style="font-size: 12px; margin: 10px 0 0 0; opacity: 0.8;"></p>
+    <div class="content" id="main-app">
+        <div id="pdf-header">
+            <h1 style="margin:0">SPECYFIKACJA OBRĄCZEK</h1>
+            <p id="pdf-date" style="margin:10px 0 0 0; opacity:0.8"></p>
         </div>
 
         <div class="mode-tab no-pdf">
-            <div id="t-single" class="tab" onclick="setMode('single')">Jedna obrączka</div>
-            <div id="t-pair" class="tab active" onclick="setMode('pair')">Para obrączek</div>
+            <div id="t-single" class="tab" onclick="setMode('single')">Jedna</div>
+            <div id="t-pair" class="tab active" onclick="setMode('pair')">Para</div>
         </div>
 
         <div class="card">
             <div class="row">
-                <div>
-                    <label>Kruszec</label>
+                <div><label>Kruszec</label>
                     <select id="kruszec" onchange="oblicz()">
                         <option value="13.6">Złoto 585 (14K)</option>
                         <option value="15.5">Złoto 750 (18K)</option>
                         <option value="10.5">Srebro 925</option>
-                        <option value="21.4">Platyna 950</option>
                     </select>
                 </div>
-                <div>
-                    <label>Cena PLN/1g</label>
-                    <input type="number" id="cenaGram" value="180" oninput="oblicz()">
-                </div>
+                <div><label>Cena/1g</label><input type="number" id="cenaGram" value="180" oninput="oblicz()"></div>
             </div>
         </div>
 
         <div class="card" id="card-a">
-            <h3 style="margin: 0 0 15px 0; font-size: 0.9rem; color: var(--gold);">💍 OBRĄCZKA A (DAMSKA)</h3>
+            <label style="color:var(--gold)">💍 Obrączka A (Damska)</label>
             <div class="row">
-                <div><label>Rozmiar PL</label><input type="number" id="r1_roz" value="12" oninput="oblicz()"></div>
-                <div><label>Szerokość (mm)</label><input type="number" id="r1_szer" value="4" step="0.5" oninput="oblicz()"></div>
+                <div><label>Rozmiar</label><input type="number" id="r1_roz" value="12" oninput="oblicz()"></div>
+                <div><label>Szerokość</label><input type="number" id="r1_szer" value="4" step="0.5" oninput="oblicz()"></div>
             </div>
             <div class="row">
-                <div><label>Grubość (mm)</label><input type="number" id="r1_grub" value="1.3" step="0.1" oninput="oblicz()"></div>
-                <div>
-                    <label>Profil / Soczewka</label>
+                <div><label>Grubość</label><input type="number" id="r1_grub" value="1.3" step="0.1" oninput="oblicz()"></div>
+                <div><label>Profil</label>
                     <select id="r1_mod" onchange="oblicz()">
-                        <option value="1.0">Płaska / Brak</option>
-                        <option value="1.12">Płaska + Soczewka</option>
-                        <option value="0.8">Półokrągła / Brak</option>
-                        <option value="0.95">Półokrągła + Soczewka</option>
+                        <option value="1.0">Płaska</option>
+                        <option value="1.12">Płaska + Socz.</option>
+                        <option value="0.8">Półokrągła</option>
+                        <option value="0.95">Półokr. + Socz.</option>
                     </select>
                 </div>
             </div>
-            <div id="r1_masa" class="mass-badge">Masa: 0.00 g</div>
+            <div id="r1_w" class="mass-label">Masa: 3.92 g</div>
         </div>
 
         <div class="card" id="card-b">
-            <h3 style="margin: 0 0 15px 0; font-size: 0.9rem; color: var(--gold);">💍 OBRĄCZKA B (MĘSKA)</h3>
+            <label style="color:var(--gold)">💍 Obrączka B (Męska)</label>
             <div class="row">
-                <div><label>Rozmiar PL</label><input type="number" id="r2_roz" value="22" oninput="oblicz()"></div>
-                <div><label>Szerokość (mm)</label><input type="number" id="r2_szer" value="5" step="0.5" oninput="oblicz()"></div>
+                <div><label>Rozmiar</label><input type="number" id="r2_roz" value="22" oninput="oblicz()"></div>
+                <div><label>Szerokość</label><input type="number" id="r2_szer" value="5" step="0.5" oninput="oblicz()"></div>
             </div>
             <div class="row">
-                <div><label>Grubość (mm)</label><input type="number" id="r2_grub" value="1.3" step="0.1" oninput="oblicz()"></div>
-                <div>
-                    <label>Profil / Soczewka</label>
+                <div><label>Grubość</label><input type="number" id="r2_grub" value="1.3" step="0.1" oninput="oblicz()"></div>
+                <div><label>Profil</label>
                     <select id="r2_mod" onchange="oblicz()">
-                        <option value="1.0">Płaska / Brak</option>
-                        <option value="1.12">Płaska + Soczewka</option>
-                        <option value="0.8">Półokrągła / Brak</option>
-                        <option value="0.95">Półokrągła + Soczewka</option>
+                        <option value="1.0">Płaska</option>
+                        <option value="1.12">Płaska + Socz.</option>
+                        <option value="0.8">Półokrągła</option>
+                        <option value="0.95">Półokr. + Socz.</option>
                     </select>
                 </div>
             </div>
-            <div id="r2_masa" class="mass-badge">Masa: 0.00 g</div>
+            <div id="r2_w" class="mass-label">Masa: 5.82 g</div>
         </div>
 
-        <div class="card">
-            <label>Dodatkowe notatki i uwagi</label>
-            <textarea id="notatki" rows="3" placeholder="Grawer, termin, wykończenie powierzchni..."></textarea>
-        </div>
-
-        <button class="btn-pdf no-pdf" onclick="generatePDF()">💾 GENERUJ PDF DO WYDRUKU</button>
+        <div class="card"><label>Notatki</label><textarea id="notatki" placeholder="Grawer, termin..."></textarea></div>
+        
+        <button class="btn-pdf no-pdf" onclick="generatePDF()">💾 GENERUJ PDF</button>
     </div>
 
     <div class="sticky-summary no-pdf">
-        <div>
-            <span class="total-label" id="label-masa">ŁĄCZNA MASA PARY</span>
-            <span id="totalMasa" style="font-weight: bold; font-size: 1.1rem;">0.00 g</span>
-        </div>
-        <div style="text-align: right;">
-            <span class="total-label">WARTOŚĆ MATERIAŁU</span>
-            <span id="totalKoszt" class="total-price">0.00 zł</span>
-        </div>
+        <div id="totalMasa" style="font-weight:bold">9.74 g</div>
+        <div id="totalKoszt" style="color:var(--gold); font-weight:800; font-size:1.4rem">1753.20 zł</div>
     </div>
 </div>
 
 <script>
-    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
-
-    let currentMode = 'pair';
-    const dzisiaj = new Date().toLocaleDateString('pl-PL');
-    document.getElementById('display-date').innerText = "Wersja Mobile Pro | " + dzisiaj;
-    document.getElementById('pdf-date-val').innerText = "Data wyceny: " + dzisiaj;
-
-    function setMode(mode) {
-        currentMode = mode;
-        document.getElementById('card-b').style.display = (mode === 'single') ? 'none' : 'block';
-        document.getElementById('t-single').classList.toggle('active', mode === 'single');
-        document.getElementById('t-pair').classList.toggle('active', mode === 'pair');
-        document.getElementById('label-masa').innerText = (mode === 'single') ? 'MASA OBRĄCZKI' : 'ŁĄCZNA MASA PARY';
+    let mode = 'pair';
+    function setMode(m) {
+        mode = m;
+        document.getElementById('card-b').style.display = m === 'single' ? 'none' : 'block';
+        document.getElementById('t-single').className = m === 'single' ? 'tab active' : 'tab';
+        document.getElementById('t-pair').className = m === 'pair' ? 'tab active' : 'tab';
         oblicz();
     }
 
-    function liczMase(roz, szer, grub, mod) {
-        const gestosc = parseFloat(document.getElementById('kruszec').value);
-        const srednica = 12.33 + (roz * 0.333);
-        const rWew = srednica / 2;
-        const rZew = rWew + grub;
-        const vol = Math.PI * (Math.pow(rZew, 2) - Math.pow(rWew, 2)) * szer;
-        return (vol / 1000) * gestosc * mod;
-    }
-
     function oblicz() {
-        const m1 = liczMase(
-            parseFloat(document.getElementById('r1_roz').value),
-            parseFloat(document.getElementById('r1_szer').value),
-            parseFloat(document.getElementById('r1_grub').value),
-            parseFloat(document.getElementById('r1_mod').value)
-        );
+        const g = parseFloat(document.getElementById('kruszec').value);
+        const c = parseFloat(document.getElementById('cenaGram').value) || 0;
         
-        let m2 = 0;
-        if (currentMode === 'pair') {
-            m2 = liczMase(
-                parseFloat(document.getElementById('r2_roz').value),
-                parseFloat(document.getElementById('r2_szer').value),
-                parseFloat(document.getElementById('r2_grub').value),
-                parseFloat(document.getElementById('r2_mod').value)
-            );
-            document.getElementById('r2_masa').innerText = `Masa: ${m2.toFixed(2)} g`;
-        }
+        const f = (r, s, gr, m) => {
+            const sr = 12.33 + (r * 0.333);
+            return (Math.PI * (Math.pow(sr/2+gr, 2) - Math.pow(sr/2, 2)) * s * g / 1000) * m;
+        };
+
+        const m1 = f(document.getElementById('r1_roz').value, document.getElementById('r1_szer').value, document.getElementById('r1_grub').value, document.getElementById('r1_mod').value);
+        const m2 = mode === 'pair' ? f(document.getElementById('r2_roz').value, document.getElementById('r2_szer').value, document.getElementById('r2_grub').value, document.getElementById('r2_mod').value) : 0;
         
-        const totalMasa = m1 + m2;
-        const cena = parseFloat(document.getElementById('cenaGram').value) || 0;
+        document.getElementById('r1_w').innerText = `Masa: ${m1.toFixed(2)} g`;
+        if(mode === 'pair') document.getElementById('r2_w').innerText = `Masa: ${m2.toFixed(2)} g`;
         
-        document.getElementById('r1_masa').innerText = `Masa: ${m1.toFixed(2)} g`;
-        document.getElementById('totalMasa').innerText = `${totalMasa.toFixed(2)} g`;
-        document.getElementById('totalKoszt').innerText = (totalMasa * cena).toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " zł";
+        const tm = m1 + m2;
+        document.getElementById('totalMasa').innerText = tm.toFixed(2) + " g";
+        document.getElementById('totalKoszt').innerText = (tm * c).toLocaleString('pl-PL') + " zł";
     }
 
     function generatePDF() {
-        const element = document.getElementById('pdf-area');
-        const pdfHeader = document.getElementById('pdf-header-only');
-        const noPdf = document.querySelectorAll('.no-pdf');
+        const area = document.getElementById('main-app');
+        document.getElementById('pdf-header').style.display = 'block';
+        document.getElementById('pdf-date').innerText = "Data: " + new Date().toLocaleDateString();
+        document.querySelectorAll('.no-pdf').forEach(el => el.style.display = 'none');
 
-        pdfHeader.style.display = 'block';
-        noPdf.forEach(el => el.style.display = 'none');
-        
-        const originalWidth = element.style.width;
-        element.style.width = "750px"; 
-
-        const opt = {
-            margin: [10, 10, 10, 10],
-            filename: 'Wycena_Obraczek_' + new Date().toISOString().slice(0,10) + '.pdf',
-            image: { type: 'jpeg', quality: 1.0 },
-            html2canvas: { scale: 2, useCORS: true, windowWidth: 800 },
+        html2pdf().set({
+            margin: [10, 10],
+            filename: 'Wycena.pdf',
+            image: { type: 'jpeg', quality: 1 },
+            html2canvas: { scale: 2, windowWidth: 800 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        html2pdf().set(opt).from(element).save().then(() => {
-            element.style.width = originalWidth;
-            pdfHeader.style.display = 'none';
-            noPdf.forEach(el => el.style.display = 'flex');
-            document.querySelector('header').style.display = 'block';
-            setMode(currentMode); 
+        }).from(area).save().then(() => {
+            document.getElementById('pdf-header').style.display = 'none';
+            document.querySelectorAll('.no-pdf').forEach(el => el.style.display = 'block');
+            setMode(mode);
         });
     }
-
     oblicz();
 </script>
 </body>
