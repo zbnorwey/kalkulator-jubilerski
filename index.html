@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jubiler Pro v4</title>
+    <title>Jubiler Pro v5</title>
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -47,9 +47,11 @@
             <div class="row">
                 <div><label>Kruszec</label>
                     <select id="kruszec" onchange="oblicz()">
-                        <option value="13.6">Złoto 585 (14K)</option>
+                        <option value="10.9">Złoto 333 (8K)</option>
+                        <option value="13.6" selected>Złoto 585 (14K)</option>
                         <option value="15.5">Złoto 750 (18K)</option>
                         <option value="10.5">Srebro 925</option>
+                        <option value="21.4">Platyna 950</option>
                     </select>
                 </div>
                 <div><label>Cena/1g</label><input type="number" id="cenaGram" value="180" oninput="oblicz()"></div>
@@ -118,7 +120,6 @@
     }
 
     function oblicz() {
-        // Bezpieczne pobieranie wartości (NaN protection)
         const getV = (id) => parseFloat(document.getElementById(id).value) || 0;
         const g = getV('kruszec');
         const c = getV('cenaGram');
@@ -159,12 +160,10 @@
         html2pdf().set(opt).from(area).save().then(() => {
             pdfHead.style.display = 'none';
             document.querySelectorAll('.no-pdf').forEach(el => el.style.display = 'flex');
-            // Przywrócenie display block dla nagłówka
             document.querySelector('header.no-pdf').style.display = 'block';
             setMode(mode);
         });
     }
-    // Inicjalizacja
     setTimeout(oblicz, 100);
 </script>
 </body>
